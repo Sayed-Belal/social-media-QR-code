@@ -12,10 +12,21 @@
 
 body{
 font-family:sans-serif;
-max-width:400px;
+max-width:420px;
 margin:auto;
 text-align:center;
 padding:20px;
+}
+
+input{
+display:block;
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+button{
+padding:10px 20px;
 }
 
 a{
@@ -33,13 +44,7 @@ text-decoration:none;
 
 <body>
 
-<h2 id="name"></h2>
-
-<p id="bio"></p>
-
-<canvas id="qr"></canvas>
-
-<div id="links"></div>
+<div id="app"></div>
 
 <script>
 
@@ -50,42 +55,96 @@ const supabase = window.supabase.createClient(
 
 const username = window.location.hash.replace("#","")
 
-async function load(){
-
 if(!username){
-document.body.innerHTML = "Add a username to the URL like #belal"
-return
+
+document.getElementById("app").innerHTML = `
+
+<h2>Create Your Page</h2>
+
+<input id="username" placeholder="username">
+<input id="name" placeholder="name">
+<input id="bio" placeholder="bio">
+
+<input id="twitter" placeholder="twitter link">
+<input id="instagram" placeholder="instagram link">
+<input id="linkedin" placeholder="linkedin link">
+
+<button onclick="create()">Create Page</button>
+
+`
+
 }
 
-const {data,error} = await supabase
-.from("profiles1")
+else{
+
+loadProfile()
+
+}
+
+async function create(){
+
+const data = {
+
+username:document.getElementById("username").value,
+name:document.getElementById("name").value,
+bio:document.getElementById("bio").value,
+twitter:document.getElementById("twitter").value,
+instagram:document.getElementById("instagram").value,
+linkedin:document.getElementById("linkedin").value
+
+}
+
+await supabase.from("profiles").insert(data)
+
+alert("Page created!")
+
+window.location = "#"+data.username
+
+location.reload()
+
+}
+
+async function loadProfile(){
+
+const {data} = await supabase
+.from("profiles")
 .select("*")
 .eq("username",username)
 .single()
 
-if(error || !data){
-document.body.innerHTML = "Profile not found"
-return
-}
+document.getElementById("app").innerHTML = `
 
-document.getElementById("name").innerText = data.name
-document.getElementById("bio").innerText = data.bio
+<h2>${data.name}</h2>
 
-data.links.forEach(link=>{
-const a=document.createElement("a")
-a.href=link.url
-a.innerText=link.name
-document.getElementById("links").appendChild(a)
-})
+<p>${data.bio}</p>
+
+<canvas id="qr"></canvas>
+
+<div id="links"></div>
+
+`
 
 QRCode.toCanvas(
 document.getElementById("qr"),
 window.location.href
 )
 
-}
+const links = [
+{n:"Twitter",v:data.twitter},
+{n:"Instagram",v:data.instagram},
+{n:"LinkedIn",v:data.linkedin}
+]
 
-load()
+links.forEach(l=>{
+if(l.v){
+const a=document.createElement("a")
+a.href=l.v
+a.innerText=l.n
+document.getElementById("links").appendChild(a)
+}
+})
+
+}
 
 </script>
 
