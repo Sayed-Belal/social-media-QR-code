@@ -106,7 +106,7 @@ location.reload()
 
 async function loadProfile(){
 
-const {data} = await supabase
+const {data} = await db
 .from("profiles")
 .select("*")
 .eq("username",username)
