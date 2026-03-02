@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Social QR</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+
+body{
+font-family:sans-serif;
+max-width:400px;
+margin:auto;
+text-align:center;
+padding:20px;
+}
+
+a{
+display:block;
+padding:12px;
+margin:8px;
+background:#eee;
+border-radius:8px;
+text-decoration:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2 id="name"></h2>
+
+<p id="bio"></p>
+
+<canvas id="qr"></canvas>
+
+<div id="links"></div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+"https://eeaplousimpgqfvkgzzo.supabase.co",
+"sb_publishable_U5bpC42sjdz6RkJl89MhJw_ldIwQUt3"
+)
+
+const username = window.location.hash.replace("#","")
+
+async function load(){
+
+const {data} = await supabase
+.from("profiles1")
+.select("*")
+.eq("username",username)
+.single()
+
+document.getElementById("name").innerText = data.name
+document.getElementById("bio").innerText = data.bio
+
+data.links.forEach(link=>{
+const a=document.createElement("a")
+a.href=link.url
+a.innerText=link.name
+document.getElementById("links").appendChild(a)
+})
+
+QRCode.toCanvas(
+document.getElementById("qr"),
+window.location.href
+)
+
+}
+
+load()
+
+</script>
+
+</body>
+</html>
