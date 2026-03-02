@@ -52,11 +52,21 @@ const username = window.location.hash.replace("#","")
 
 async function load(){
 
-const {data} = await supabase
+if(!username){
+document.body.innerHTML = "Add a username to the URL like #belal"
+return
+}
+
+const {data,error} = await supabase
 .from("profiles1")
 .select("*")
 .eq("username",username)
 .single()
+
+if(error || !data){
+document.body.innerHTML = "Profile not found"
+return
+}
 
 document.getElementById("name").innerText = data.name
 document.getElementById("bio").innerText = data.bio
